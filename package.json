@@ -1,0 +1,22 @@
+{
+  "name": "schoollunchemails",
+  "version": "1.0.0",
+  "description": "because my son won't tell me what he ate today",
+  "main": "main.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/piyh/schoolLunchEmails.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/piyh/schoolLunchEmails/issues"
+  },
+  "homepage": "https://github.com/piyh/schoolLunchEmails#readme",
+  "dependencies": {
+    "nodemailer": "^6.9.9"
+  }
+}

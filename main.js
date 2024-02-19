@@ -69,22 +69,19 @@ function readFileSyncToString(filePath) {
 }
 
 function createMealSentence(meals) {
-  // Helper function to format meal items into a readable list
+  // Helper function to format meal items into a bulleted list
   function formatMealItems(items) {
-    if (items.length > 1) {
-      const lastItem = items.pop();
-      return `${items.join(', ')} and ${lastItem}`;
-    }
-    return items[0];
+    return items.map(item => `• ${item}`).join('\n');
   }
 
-  // Construct sentences for breakfast and lunch
-  const breakfastSentence = `Today, Finn is having ${formatMealItems(meals.breakfast)} for breakfast.`;
-  const lunchSentence = `For lunch, he'll be having ${formatMealItems(meals.lunch)}.`;
+  // Construct bulleted lists for breakfast and lunch
+  const breakfastList = formatMealItems(meals.breakfast);
+  const lunchList = formatMealItems(meals.lunch);
 
-  // Combine and return the full sentence
-  return `${breakfastSentence} ${lunchSentence}`;
+  // Combine and return the full message with lists
+  return `Today, Finn is having the following for breakfast:\n${breakfastList}\n\nFor lunch, he'll be having:\n${lunchList}`;
 }
+
 
 async function sendEmail(body, emailList, password) {
   if (!body){

@@ -87,20 +87,18 @@ async function sendEmail(body, emailList, password) {
   if (!body){
     return
   }
-  // Create a transporter object using the default SMTP transport
   let transporter = nodemailer.createTransport({
     service: 'gmail',
     auth: {
-      user: 'captionsearchio@gmail.com', // Your Gmail address
+      user: 'captionsearchio@gmail.com', 
       pass: password
     }
   });
 
-  // Define email options
   let mailOptions = {
     from: '"Ryan\'s Finn Food Script" <captionsearchio@gmail.com>', // Sender address
-    to: emailList, // List of recipients
-    subject: `Finn Food for ${dateCompareString}`, // Subject line
+    to: emailList, // List or string for recipients
+    subject: `Finn Food for ${dateCompareString}`, 
     text: body, // Plain text body
     // html: '<b>Hello world?</b>' // HTML body content
   };

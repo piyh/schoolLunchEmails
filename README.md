@@ -30,4 +30,6 @@ Grab the output from `which node`
 `crontab -e`
 
 Schedule the job at 7am Monday through Friday with:
- `0 7 * * 1-5 cd ~/schoolLunchEmails && $(which node) main.js`
+ `0 7 * * 1-5 /home/pi/.nvm/versions/node/v20.11.1/bin/node /home/pi/schoolLunchEmails/main.js`
+
+ Make sure you substitute your node path and repo directory correctly on each part

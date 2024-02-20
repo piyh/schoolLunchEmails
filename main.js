@@ -6,7 +6,7 @@ const baseUrl = 'https://dmschools.api.nutrislice.com/menu/api/weeks/school/jess
 
 const today = new Date()
 const year = today.getFullYear().toString().padStart("2", "0")
-const month = today.getMonth().toString().padStart("2", "0")
+const month = (today.getMonth()+1).toString().padStart("2", "0")
 const day = today.getDate().toString().padStart("2", "0")
 const dateUrlString = `${year}/${month}/${day}`
 const dateCompareString = `${year}-${month}-${day}`
@@ -21,7 +21,7 @@ async function fetchTodaysMeals() {
   
   for (const meal of ["breakfast", "lunch"]) {
     const url = baseUrl.replace('{YYYY/MM/DD}', dateUrlString).replace('{lunchOrBreakfast}', meal)
-
+    console.log(`URL = ${url}`)
     try {
       // Fetch the webpage
       const response = await fetch(url);
@@ -35,6 +35,7 @@ async function fetchTodaysMeals() {
       for (const day of days){
         if (day['date'] === dateCompareString){
           todaysMenuItems = day['menu_items']
+          break
         }
       }
       if (!todaysMenuItems){
@@ -69,6 +70,10 @@ function readFileSyncToString(filePath) {
 }
 
 function createMealSentence(meals) {
+  if (!meals.breakfast && !meals.lunch){
+    console.log("not sending email due to blank breakfast and lunch")
+    return
+  }
   // Helper function to format meal items into a bulleted list
   function formatMealItems(items) {
     return items.map(item => `• ${item}`).join('\n');
@@ -85,6 +90,7 @@ function createMealSentence(meals) {
 
 async function sendEmail(body, emailList, password) {
   if (!body){
+    console.log("not sending email due to blank body")
     return
   }
   let transporter = nodemailer.createTransport({

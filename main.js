@@ -1,6 +1,7 @@
 'use-strict'
 const nodemailer = require("nodemailer");
 const fs = require('fs');
+const path = require('path');
 
 const baseUrl = 'https://dmschools.api.nutrislice.com/menu/api/weeks/school/jess-franklin-taylor/menu-type/{lunchOrBreakfast}/{YYYY/MM/DD}'
 
@@ -12,6 +13,8 @@ const dateUrlString = `${year}/${month}/${day}`
 const dateCompareString = `${year}-${month}-${day}`
 // https://dmschools.api.nutrislice.com/menu/api/weeks/school/jess-franklin-taylor/menu-type/lunch/2024/02/19/
 
+const emailFile = path.join(__dirname, 'emails.txt');
+const passwordFile = path.join(__dirname, 'password.txt');
 
 async function fetchTodaysMeals() {
   const todaysFood = {
@@ -121,8 +124,8 @@ async function sendEmail(body, emailList, password) {
   
   const food = await fetchTodaysMeals();
   console.log(food);
-  const password = readFileSyncToString('password.txt')
-  const emails = readFileSyncToString('emails.txt').split("\n")
+  const password = readFileSyncToString(passwordFile)
+  const emails = readFileSyncToString(emailFile).split("\n")
   const body = createMealSentence(food)
   await sendEmail(body, emails, password).catch(console.error);
   

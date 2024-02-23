@@ -45,7 +45,10 @@ async function fetchTodaysMeals() {
         continue;
       }
       for (const menuItem of todaysMenuItems){
-        todaysFood[meal].push(menuItem['food']['name'])
+        const foodName = menuItem.food?.name
+        if (foodName){
+          todaysFood[meal].push(foodName)
+        }
       }
     } catch (error) {
       console.error('Error fetching page:', error);
@@ -128,6 +131,5 @@ async function sendEmail(body, emailList, password) {
   const emails = readFileSyncToString(emailFile).split("\n")
   const body = createMealSentence(food)
   await sendEmail(body, emails, password).catch(console.error);
-  
 })();
 

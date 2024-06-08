@@ -18,5 +18,10 @@
   "homepage": "https://github.com/piyh/schoolLunchEmails#readme",
   "dependencies": {
     "nodemailer": "^6.9.9"
+  },
+  "devDependencies": {
+    "@types/node": "^20.14.2",
+    "@types/nodemailer": "^6.4.15",
+    "typescript": "^5.4.5"
   }
 }

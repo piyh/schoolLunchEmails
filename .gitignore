@@ -161,3 +161,6 @@ cython_debug/
 password.txt
 node_modules/**
 emails.txt
+
+
+build/

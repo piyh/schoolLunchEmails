@@ -3,33 +3,55 @@ import nodemailer from "nodemailer";
 import fs from 'fs';
 import path from 'path';
 
-const baseUrl = 'https://dmschools.api.nutrislice.com/menu/api/weeks/school/jess-franklin-taylor/menu-type/{lunchOrBreakfast}/{YYYY/MM/DD}'
+const BASE_API_URL = 'https://dmschools.api.nutrislice.com/menu/api/weeks/school/jess-franklin-taylor/menu-type/{lunchOrBreakfast}/{YYYY/MM/DD}'
+const BASE_DISPLAY_URL = 'https://dmschools.nutrislice.com/menu/jess-franklin-taylor/{lunchOrBreakfast}/{YYYY-MM-DD}'
 
-const today = new Date()
-const year = today.getFullYear().toString().padStart(2, "0")
-const month = (today.getMonth()+1).toString().padStart(2, "0")
-const day = today.getDate().toString().padStart(2, "0")
-const dateUrlString = `${year}/${month}/${day}`
-const dateCompareString = `${year}-${month}-${day}`
+const DATE = new Date()
+if (todayOrTomorrow() === "Tomorrow"){
+  DATE.setDate(DATE.getDate()+1);
+}
+const YEAR = DATE.getFullYear().toString().padStart(2, "0")
+const MONTH = (DATE.getMonth()+1).toString().padStart(2, "0")
+const DAY = DATE.getDate().toString().padStart(2, "0")
+const DATE_COMPARE_STRING = `${YEAR}-${MONTH}-${DAY}`
+// hour at which the email will switch to tomorrow instead of today
 // https://dmschools.api.nutrislice.com/menu/api/weeks/school/jess-franklin-taylor/menu-type/lunch/2024/02/19/
 
-const emailFile = path.join(__dirname, '../emails.txt');
-const passwordFile = path.join(__dirname, '../password.txt');
+const EMAIL_FILE = path.join(__dirname, '../emails.txt');
+const PW_FILE = path.join(__dirname, '../password.txt');
 
 type Meals = {
   breakfast: string[],
   lunch: string[]
 }
 
-async function fetchTodaysMeals():Promise<Meals> {
+type Day = "Today" | "Tomorrow"
+
+function todayOrTomorrow(): Day {
+  const dayCutoffHour = 4
+  if (dayCutoffHour >= new Date().getHours()){
+    return "Tomorrow" 
+  }
+  return "Today"
+}
+
+function getMealUrl(meal:keyof Meals, type: "display" | "api"){
+  const dateUrlString = `${YEAR}/${MONTH}/${DAY}`
+  if (type === "api"){
+    return BASE_API_URL.replace('{YYYY/MM/DD}', dateUrlString).replace('{lunchOrBreakfast}', meal)
+  } 
+  // note `-` instead of `/` for this replace
+  return   BASE_DISPLAY_URL.replace('{YYYY-MM-DD}', dateUrlString).replace('{lunchOrBreakfast}', meal)
+}
+
+async function fetchMealsFromSite():Promise<Meals> {
   const todaysFood:Meals = {
     'breakfast':[],
     'lunch':[]
   }
   
   for (const meal of Object.keys(todaysFood) as (keyof Meals)[]) {
-    const url = baseUrl.replace('{YYYY/MM/DD}', dateUrlString).replace('{lunchOrBreakfast}', meal)
-    console.log(`URL = ${url}`)
+    const url = getMealUrl(meal, "api")
     try {
       // Fetch the webpage
       const response = await fetch(url);
@@ -41,7 +63,7 @@ async function fetchTodaysMeals():Promise<Meals> {
       const days = jsonBody.days
       let todaysMenuItems; 
       for (const day of days){
-        if (day['date'] === dateCompareString){
+        if (day['date'] === DATE_COMPARE_STRING){
           todaysMenuItems = day['menu_items']
           break
         }
@@ -65,11 +87,9 @@ async function fetchTodaysMeals():Promise<Meals> {
 
 
 /**
- * Reads the contents of a file synchronously.
- * @param {string} filePath The path to the file.
- * @returns {string} The contents of the file.
+ * Returns the contents of a file synchronously.
  */
-function readFileSyncToString(filePath:string) {
+function readFileSyncToString(filePath:string):string {
   try {
       // Synchronously read the file content
       const data = fs.readFileSync(filePath, { encoding: 'utf8' });
@@ -80,7 +100,7 @@ function readFileSyncToString(filePath:string) {
   }
 }
 
-function createMealSentence(meals:Meals) {
+function composeEmailBody(meals:Meals) {
   if (
       (!meals.breakfast && !meals.lunch)
       ||
@@ -97,9 +117,12 @@ function createMealSentence(meals:Meals) {
   // Construct bulleted lists for breakfast and lunch
   const breakfastList = formatMealItems(meals.breakfast);
   const lunchList = formatMealItems(meals.lunch);
-
+  
+  
   // Combine and return the full message with lists
-  return `Today, Finn is having the following for breakfast:\n${breakfastList}\n\nFor lunch, he'll be having:\n${lunchList}`;
+  let body =  `${todayOrTomorrow()}, Finn is having the following for breakfast:\n${breakfastList}\n\nFor lunch, he'll be having:\n${lunchList}\n\n`;
+  body += `${getMealUrl("breakfast", "display")}`
+  return body
 }
 
 
@@ -119,7 +142,7 @@ async function sendEmail(body:string, emailList:string[], password:string) {
   let mailOptions = {
     from: '"Ryan\'s Finn Food Script" <captionsearchio@gmail.com>', // Sender address
     to: emailList, // List or string for recipients
-    subject: `Finn Food for ${dateCompareString}`, 
+    subject: `Finn Food for ${DATE_COMPARE_STRING}`, 
     text: body, // Plain text body
     // html: '<b>Hello world?</b>' // HTML body content
   };
@@ -134,11 +157,11 @@ async function sendEmail(body:string, emailList:string[], password:string) {
 // Call the function using an async IIFE
 (async () => {
   
-  const food = await fetchTodaysMeals();
+  const food = await fetchMealsFromSite();
   console.log(food);
-  const password = readFileSyncToString(passwordFile)
-  const emails = readFileSyncToString(emailFile).split("\n")
-  const body = createMealSentence(food)
+  const password = readFileSyncToString(PW_FILE)
+  const emails = readFileSyncToString(EMAIL_FILE).split("\n")
+  const body = composeEmailBody(food)
   await sendEmail(body, emails, password).catch(console.error);
 
 })();

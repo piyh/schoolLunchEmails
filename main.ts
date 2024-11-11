@@ -4,7 +4,7 @@ import fs from 'fs';
 import path from 'path';
 
 const BASE_API_URL = 'https://dmschools.api.nutrislice.com/menu/api/weeks/school/jess-franklin-taylor/menu-type/{lunchOrBreakfast}/{YYYY/MM/DD}'
-const BASE_DISPLAY_URL = 'https://dmschools.nutrislice.com/menu/jess-franklin-taylor/{lunchOrBreakfast}/{YYYY-MM-DD}'
+const BASE_DISPLAY_URL = 'https://dmschools.nutrislice.com/menu/jess-franklin-taylor/{lunchOrBreakfast}/{YYYY/MM/DD}'
 
 const DATE = new Date()
 if (todayOrTomorrow() === "Tomorrow"){
@@ -36,12 +36,13 @@ function todayOrTomorrow(): Day {
 }
 
 function getMealUrl(meal:keyof Meals, type: "display" | "api"){
-  const dateUrlString = `${YEAR}/${MONTH}/${DAY}`
   if (type === "api"){
+    const dateUrlString = `${YEAR}/${MONTH}/${DAY}`
     return BASE_API_URL.replace('{YYYY/MM/DD}', dateUrlString).replace('{lunchOrBreakfast}', meal)
   } 
-  // note `-` instead of `/` for this replace
-  return   BASE_DISPLAY_URL.replace('{YYYY-MM-DD}', dateUrlString).replace('{lunchOrBreakfast}', meal)
+  // note `-` instead of `/` in replacement string
+  const dateUrlString = `${YEAR}-${MONTH}-${DAY}`
+  return   BASE_DISPLAY_URL.replace('{YYYY/MM/DD}', dateUrlString).replace('{lunchOrBreakfast}', meal)
 }
 
 async function fetchMealsFromSite():Promise<Meals> {

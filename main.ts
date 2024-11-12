@@ -27,9 +27,9 @@ type Meals = {
 
 type Day = "Today" | "Tomorrow"
 
-function todayOrTomorrow(): Day {
-  const dayCutoffHour = 4
-  if (dayCutoffHour >= new Date().getHours()){
+function todayOrTomorrow() {
+  const dayCutoffHour = 9
+  if (dayCutoffHour <= new Date().getHours()){
     return "Tomorrow" 
   }
   return "Today"

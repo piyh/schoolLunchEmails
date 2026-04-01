@@ -3,8 +3,9 @@ import nodemailer from "nodemailer";
 import fs from 'fs';
 import path from 'path';
 
-const BASE_API_URL = 'https://dmschools.api.nutrislice.com/menu/api/weeks/school/jess-franklin-taylor/menu-type/{lunchOrBreakfast}/{YYYY/MM/DD}'
-const BASE_DISPLAY_URL = 'https://dmschools.nutrislice.com/menu/jess-franklin-taylor/{lunchOrBreakfast}/{YYYY/MM/DD}'
+const BASE_API_URL = 'https://dmschools.api.nutrislice.com/menu/api/weeks/school/{school}/menu-type/{lunchOrBreakfast}/{YYYY/MM/DD}'
+const BASE_DISPLAY_URL = 'https://dmschools.nutrislice.com/menu/{school}/{lunchOrBreakfast}/{YYYY/MM/DD}'
+const SCHOOL = "hubbell"
 
 const DATE = new Date()
 if (todayOrTomorrow() === "Tomorrow"){
@@ -15,7 +16,7 @@ const MONTH = (DATE.getMonth()+1).toString().padStart(2, "0")
 const DAY = DATE.getDate().toString().padStart(2, "0")
 const DATE_COMPARE_STRING = `${YEAR}-${MONTH}-${DAY}`
 // hour at which the email will switch to tomorrow instead of today
-// https://dmschools.api.nutrislice.com/menu/api/weeks/school/jess-franklin-taylor/menu-type/lunch/2024/02/19/
+// https://dmschools.api.nutrislice.com/menu/api/weeks/school/{school}/menu-type/lunch/2024/02/19/
 
 const EMAIL_FILE = path.join(__dirname, '../emails.txt');
 const PW_FILE = path.join(__dirname, '../password.txt');
@@ -38,11 +39,11 @@ function todayOrTomorrow() {
 function getMealUrl(meal:keyof Meals, type: "display" | "api"){
   if (type === "api"){
     const dateUrlString = `${YEAR}/${MONTH}/${DAY}`
-    return BASE_API_URL.replace('{YYYY/MM/DD}', dateUrlString).replace('{lunchOrBreakfast}', meal)
+    return BASE_API_URL.replace('{YYYY/MM/DD}', dateUrlString).replace('{lunchOrBreakfast}', meal).replace('{school}', SCHOOL)
   } 
   // note `-` instead of `/` in replacement string
   const dateUrlString = `${YEAR}-${MONTH}-${DAY}`
-  return   BASE_DISPLAY_URL.replace('{YYYY/MM/DD}', dateUrlString).replace('{lunchOrBreakfast}', meal)
+  return   BASE_DISPLAY_URL.replace('{YYYY/MM/DD}', dateUrlString).replace('{lunchOrBreakfast}', meal).replace('{school}', SCHOOL)
 }
 
 async function fetchMealsFromSite():Promise<Meals> {
